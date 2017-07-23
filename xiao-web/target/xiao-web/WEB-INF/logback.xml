@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- 但修改了本文件时，可以60秒重新载入本xml文件 -->
+<configuration scan="true" scanPeriod="10 seconds" debug="false">
+	<!-- 配置log文件的目录 -->
+	<!-- value都配置成/data/logs/[具体业务名称] 例如下面-->
+	<!-- <property name="LOG_PATH" value="/data/logs/carwash" /> -->
+	<property resource="log4j.properties"/>
+	<property name="LOG_PATH" value="${log.path}" />
+	<property name="LOG_LEVEL" value="${log.level}" />
+
+	<!-- 不往console中打log，所以删除了console的appender -->
+	
+	<!-- 所有日志文件，root打到这里 -->
+	<appender name="commonLogAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<!-- commonlog固定打到这个目录中，文件名字固定，不往子目录中打 -->
+			<fileNamePattern>${LOG_PATH}/common_%d{yyyy-MM-dd}.log</fileNamePattern>
+			<!-- 只保留最近30天的 -->
+			<maxHistory>30</maxHistory>
+		</rollingPolicy>
+		<!-- 日志文件格式 -->
+		<encoder>
+			<!-- 业务分析log格式，所有业务分析使用的格式，都是这个格式，一般对应的logger都是warn或者error -->
+			<pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}]%-5level:%msg==>%logger.%method\(%file:%L\)[%t]%n</pattern>
+			<charset>utf-8</charset>
+		</encoder>
+	</appender>
+	
+	<!-- 服务层代码日志记录 -->
+	<appender name="serviceAppander" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<!-- commonlog固定打到这个目录中，文件名字固定，不往子目录中打 -->
+			<fileNamePattern>${LOG_PATH}/service/service_%d{yyyy-MM-dd}.log</fileNamePattern>
+			<!-- 只保留最近30天的 -->
+			<maxHistory>30</maxHistory>
+		</rollingPolicy>
+		<!-- 日志文件格式 -->
+		<encoder>
+			<!-- 业务分析log格式，所有业务分析使用的格式，都是这个格式，一般对应的logger都是warn或者error -->
+			<pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}]%-5level:%msg==>%logger.%method\(%file:%L\)[%t]%n</pattern>
+			<charset>utf-8</charset>
+		</encoder>
+	</appender>
+	
+	<!-- api代码日志记录 -->
+	<appender name="apiAppander" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<!-- commonlog固定打到这个目录中，文件名字固定，不往子目录中打 -->
+			<fileNamePattern>${LOG_PATH}/api/api_%d{yyyy-MM-dd}.log</fileNamePattern>
+			<!-- 只保留最近30天的 -->
+			<maxHistory>30</maxHistory>
+		</rollingPolicy>
+		<!-- 日志文件格式 -->
+		<encoder>
+			<!-- 业务分析log格式，所有业务分析使用的格式，都是这个格式，一般对应的logger都是warn或者error -->
+			<pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}]%-5level:%msg==>%logger.%method\(%file:%L\)[%t]%n</pattern>
+			<charset>utf-8</charset>
+		</encoder>
+	</appender>
+	
+	<!-- 为每个包下的所有类指定，也可以指定到具体的类名称 -->
+<!--	<logger name="com.edaijia.aftermarket.service" level="${LOG_LEVEL}" additivity="false">
+		<appender-ref ref="serviceAppander" />
+	</logger>
+	
+    <logger name="com.edaijia.chehou.common" level="${LOG_LEVEL}" additivity="false">
+		<appender-ref ref="serviceAppander" />
+	</logger> 
+	
+	<logger name="com.edaijia.aftermarket.api" level="${LOG_LEVEL}" additivity="false">
+		<appender-ref ref="apiAppander" />
+	</logger>-->
+
+
+	<root level="${LOG_LEVEL}">
+		<appender-ref ref="commonLogAppender" />
+	</root>
+</configuration>

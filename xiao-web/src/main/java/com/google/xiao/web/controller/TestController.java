@@ -6,6 +6,7 @@ package com.google.xiao.web.controller;
 
 import com.google.gson.Gson;
 import com.google.xiao.domain.TestModel;
+import com.google.xiao.service.IRetryService;
 import com.google.xiao.service.ITestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -28,6 +29,10 @@ public class TestController {
     @Autowired
     private ITestService testService;
 
+
+    @Autowired
+    private IRetryService retryService;
+
     /**
      * 获取所有有效的banner信息.
      *
@@ -48,6 +53,14 @@ public class TestController {
     public String getHello() {
 
         return testService.getHello();
+    }
+
+    @RequestMapping(value = "/getRetryHello", method = RequestMethod.GET)
+    @ResponseBody
+    public String getRetryHello() {
+
+         retryService.retryPrintHello();
+        return "hello" ;
     }
 
 }

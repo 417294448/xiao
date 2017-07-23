@@ -60,8 +60,7 @@
 	</appender>
 	
 	<!-- 为每个包下的所有类指定，也可以指定到具体的类名称 -->
-	<!-- 用于分析中的业务异常 
-	<!-- <logger name="com.edaijia.aftermarket.service" level="${LOG_LEVEL}" additivity="false">
+<!--	<logger name="com.edaijia.aftermarket.service" level="${LOG_LEVEL}" additivity="false">
 		<appender-ref ref="serviceAppander" />
 	</logger>
 	
