@@ -4,7 +4,7 @@
 		 xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
 		 id="WebApp_ID" version="3.0">
 
-	<display-name>aftermarket-api</display-name>
+	<display-name>xiao-web</display-name>
 
 	<listener>
 		<listener-class>org.springframework.web.context.request.RequestContextListener </listener-class>
@@ -32,11 +32,11 @@
 	</servlet-mapping>
 
 	<!-- logback configure -->
-<!--	<listener>
-		<listener-class>
-			ch.qos.logback.ext.spring.web.LogbackConfigListener
-		</listener-class>
-	</listener>-->
+	<!--<listener>-->
+		<!--<listener-class>-->
+			<!--ch.qos.logback.ext.spring.web.LogbackConfigListener-->
+		<!--</listener-class>-->
+	<!--</listener>-->
 
 	<!-- Spring 容器加载 -->
 	<listener>

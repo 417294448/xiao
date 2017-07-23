@@ -12,41 +12,17 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>war</packaging>
 
-
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>utf-8</project.reporting.outputEncoding>
-
-        <junit-version>4.11</junit-version>
-        <testng-version>6.1.1</testng-version>
-        <springframework-version>4.0.8.RELEASE</springframework-version>
-        <spring-mock-version>2.0.8</spring-mock-version>
-        <servlet-api-version>2.4</servlet-api-version>
-        <jsp-api-version>2.0</jsp-api-version>
-        <jstl-version>1.1.2</jstl-version>
-        <ezmorph-version>1.0.6</ezmorph-version>
-        <commons-codec-version>1.9</commons-codec-version>
-        <commons-el-version>1.0</commons-el-version>
-        <commons-fileupload-version>1.3.1</commons-fileupload-version>
-        <commons-io-version>1.4</commons-io-version>
-        <commons-lang-version>2.6</commons-lang-version>
-        <commons-collections-version>3.2.1</commons-collections-version>
-        <commons-logging-version>1.2</commons-logging-version>
-        <commons-validator-version>1.3.1</commons-validator-version>
-        <freemarker-version>2.3.13</freemarker-version>
-        <json-lib-version>0.9</json-lib-version>
-        <lucene-core-version>4.9.0</lucene-core-version>
-        <pager-taglib-version>2.0</pager-taglib-version>
-        <standard-version>1.1.2</standard-version>
-        <quartz-version>2.2.1</quartz-version>
-    </properties>
-
-
     <dependencies>
 
         <dependency>
             <groupId>com.google.xiao</groupId>
             <artifactId>xiao-model</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.xiao</groupId>
+            <artifactId>xiao-service</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
 
