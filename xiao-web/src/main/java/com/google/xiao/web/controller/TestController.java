@@ -6,8 +6,10 @@ package com.google.xiao.web.controller;
 
 import com.google.gson.Gson;
 import com.google.xiao.domain.TestModel;
+import com.google.xiao.service.IPerf4jService;
 import com.google.xiao.service.IRetryService;
 import com.google.xiao.service.ITestService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @Controller
 @RequestMapping("/test")
+@Slf4j
 public class TestController {
 
 
@@ -33,8 +36,11 @@ public class TestController {
     @Autowired
     private IRetryService retryService;
 
+    @Autowired
+    private IPerf4jService perf4jService;
+
     /**
-     * 获取所有有效的banner信息.
+     * test lombok
      *
      * @return
      */
@@ -48,6 +54,10 @@ public class TestController {
         return  new Gson().toJson(testModel);
     }
 
+    /**
+     * test service bean scan
+     * @return
+     */
     @RequestMapping(value = "/getHello", method = RequestMethod.GET)
     @ResponseBody
     public String getHello() {
@@ -55,6 +65,10 @@ public class TestController {
         return testService.getHello();
     }
 
+    /**
+     * test retry
+     * @return
+     */
     @RequestMapping(value = "/getRetryHello", method = RequestMethod.GET)
     @ResponseBody
     public String getRetryHello() {
@@ -63,4 +77,16 @@ public class TestController {
         return "hello" ;
     }
 
+    /**
+     * test retry
+     * @return
+     */
+    @RequestMapping(value = "/getTestPerf4j", method = RequestMethod.GET)
+    @ResponseBody
+    public String getTestPerf4j() throws InterruptedException {
+        log.info("log in controller start");
+        perf4jService.getPerfLog();
+        log.info("log in controller end");
+        return "perf4j" ;
+    }
 }

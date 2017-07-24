@@ -1,16 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- 但修改了本文件时，可以60秒重新载入本xml文件 -->
-<configuration scan="true" scanPeriod="10 seconds" debug="false">
+	<!-- 但修改了本文件时，可以60秒重新载入本xml文件 -->
+	<configuration scan="true" scanPeriod="10 seconds" debug="false">
 	<!-- 配置log文件的目录 -->
-	<!-- value都配置成/data/logs/[具体业务名称] 例如下面-->
-	<!-- <property name="LOG_PATH" value="/data/logs/carwash" /> -->
 	<property resource="log4j.properties"/>
 	<property name="LOG_PATH" value="${log.path}" />
 	<property name="LOG_LEVEL" value="${log.level}" />
 
-	<!-- 不往console中打log，所以删除了console的appender -->
-	
+	<!--控制台输出-->
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<!-- encoder 默认配置为PatternLayoutEncoder -->
+		<encoder>
+			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+		</encoder>
+	</appender>
+
 	<!-- 所有日志文件，root打到这里 -->
 	<appender name="commonLogAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
@@ -58,22 +62,39 @@
 			<charset>utf-8</charset>
 		</encoder>
 	</appender>
+
+	<!--perf4j配置-->
+	<appender name="statistics" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<Encoding>UTF-8</Encoding>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<!--日志文件输出的文件名 -->
+			<FileNamePattern>${LOG_PATH}/statistics/statistics.%d{yyyy-MM-dd}.log</FileNamePattern>
+		</rollingPolicy>
+		<layout class="ch.qos.logback.classic.PatternLayout">
+			<pattern>%msg%n</pattern>
+		</layout>
+	</appender>
+	<appender name="coalescingStatistics" class="org.perf4j.logback.AsyncCoalescingStatisticsAppender">
+		<timeSlice>10000</timeSlice>
+		<appender-ref ref="statistics"/>
+	</appender>
+
+	<logger name="org.perf4j.TimingLogger" level="info" additivity="false">
+		<appender-ref ref="coalescingStatistics" />
+	</logger>
+	<!--perf4j配置结束-->
 	
 	<!-- 为每个包下的所有类指定，也可以指定到具体的类名称 -->
-<!--	<logger name="com.edaijia.aftermarket.service" level="${LOG_LEVEL}" additivity="false">
+	<logger name="com.google.xiao.service" level="${LOG_LEVEL}" additivity="false">
 		<appender-ref ref="serviceAppander" />
 	</logger>
 	
-    <logger name="com.edaijia.chehou.common" level="${LOG_LEVEL}" additivity="false">
-		<appender-ref ref="serviceAppander" />
-	</logger> 
-	
-	<logger name="com.edaijia.aftermarket.api" level="${LOG_LEVEL}" additivity="false">
+	<logger name="com.google.xiao.web" level="${LOG_LEVEL}" additivity="false">
 		<appender-ref ref="apiAppander" />
-	</logger>-->
-
+	</logger>
 
 	<root level="${LOG_LEVEL}">
 		<appender-ref ref="commonLogAppender" />
+		<appender-ref ref="STDOUT" />
 	</root>
 </configuration>

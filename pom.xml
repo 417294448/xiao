@@ -46,11 +46,16 @@
 
 	<dependencyManagement>
 		<dependencies>
-			<!--json-->
+			<!--json fasjson gson jackson-->
 			<dependency>
 				<groupId>com.alibaba</groupId>
 				<artifactId>fastjson</artifactId>
 				<version>1.2.28</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.code.gson</groupId>
+				<artifactId>gson</artifactId>
+				<version>2.2.4</version>
 			</dependency>
 			<dependency>
 				<groupId>org.codehaus.jackson</groupId>
@@ -62,11 +67,6 @@
 				<artifactId>jackson-mapper-asl</artifactId>
 				<version>1.9.13</version>
 			</dependency>
-			<dependency>
-				<groupId>com.google.code.gson</groupId>
-				<artifactId>gson</artifactId>
-				<version>2.2.4</version>
-			</dependency>
 			<!--json-->
 
 			<!--lombok-->
@@ -77,41 +77,33 @@
 			</dependency>
 			<!--lombok-->
 
-			<!--commons-->
+			<!--http 'commons-httpclient' have discarded-->
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpclient</artifactId>
-				<version>4.3.3</version>
+				<version>4.4</version>
 			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpcore</artifactId>
+				<version>4.4</version>
+			</dependency>
+			<!--http-->
+
+			<!--apache commons-->
+			<!--'commons-lang' will discard,commons-lang3 StringUtils,ObjectUtils,SystemUtils,DateUtils/CalendarUtils,StopWatch,ArrayUtils and so on-->
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-lang3</artifactId>
 				<version>3.3.2</version>
 			</dependency>
-			<dependency>
-				<groupId>commons-lang</groupId>
-				<artifactId>commons-lang</artifactId>
-				<version>${commons-lang-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>commons-httpclient</groupId>
-				<artifactId>commons-httpclient</artifactId>
-				<version>3.1</version>
-			</dependency>
+			<!--'commons-collections' provide collecttion relatived utils-->
 			<dependency>
 				<groupId>commons-collections</groupId>
 				<artifactId>commons-collections</artifactId>
 				<version>${commons-collections-version}</version>
 			</dependency>
-			<!--commons-->
-
-			<!--mock-->
-			<dependency>
-				<groupId>org.mockito</groupId>
-				<artifactId>mockito-all</artifactId>
-				<version>1.9.5</version>
-			</dependency>
-			<!--mock-->
+			<!--apache commons-->
 
 			<!-- jsp -->
 			<dependency>
@@ -131,20 +123,21 @@
 			</dependency>
 			<dependency>
 				<groupId>javax.servlet</groupId>
-				<artifactId>servlet-api</artifactId>
-				<version>${servlet-api-version}</version>
-			</dependency>
-			<dependency>
-				<groupId>javax.servlet</groupId>
 				<artifactId>jsp-api</artifactId>
 				<version>${jsp-api-version}</version>
+			</dependency>
+			<!-- jsp -->
+
+			<dependency>
+				<groupId>javax.servlet</groupId>
+				<artifactId>servlet-api</artifactId>
+				<version>${servlet-api-version}</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.servlet</groupId>
 				<artifactId>javax.servlet-api</artifactId>
 				<version>3.1.0</version>
 			</dependency>
-			<!-- jsp -->
 
 			<!--validation-->
 			<dependency>
@@ -198,11 +191,6 @@
 			</dependency>
 			<dependency>
 				<groupId>org.springframework</groupId>
-				<artifactId>spring-mock</artifactId>
-				<version>2.0.8</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework</groupId>
 				<artifactId>spring-aop</artifactId>
 				<version>${springframework-version}</version>
 			</dependency>
@@ -213,12 +201,13 @@
 			</dependency>
 			<dependency>
 				<groupId>org.springframework</groupId>
-				<artifactId>spring-jdbc</artifactId>
+				<artifactId>spring-tx</artifactId>
 				<version>${springframework-version}</version>
 			</dependency>
+			<!--spring db-->
 			<dependency>
 				<groupId>org.springframework</groupId>
-				<artifactId>spring-tx</artifactId>
+				<artifactId>spring-jdbc</artifactId>
 				<version>${springframework-version}</version>
 			</dependency>
 			<dependency>
@@ -236,15 +225,13 @@
 				<artifactId>spring-data-commons</artifactId>
 				<version>1.9.0.RELEASE</version>
 			</dependency>
-			<!-- spring -->
-
-			<!--monitor-->
+			<!--spring self mock-->
 			<dependency>
-				<groupId>org.perf4j</groupId>
-				<artifactId>perf4j</artifactId>
-				<version>0.9.16</version>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-mock</artifactId>
+				<version>2.0.8</version>
 			</dependency>
-			<!--monitor-->
+			<!-- spring -->
 
 			<!--junit-->
 			<dependency>
@@ -254,6 +241,14 @@
 				<scope>test</scope>
 			</dependency>
 			<!--junit-->
+			<!--mock-->
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-all</artifactId>
+				<version>1.9.5</version>
+				<scope>test</scope>
+			</dependency>
+			<!--mock-->
 
 			<!--log-->
 			<dependency>
@@ -288,6 +283,15 @@
 			</dependency>
 			<!--log-->
 
+			<!--perf4j monitor some method, used with logback or log4j
+			   Perf4J is to System.currentTimeMillis() as log4j is to System.out.println()-->
+			<dependency>
+				<groupId>org.perf4j</groupId>
+				<artifactId>perf4j</artifactId>
+				<version>0.9.16</version>
+			</dependency>
+			<!--perf4j-->
+
 			<!--db-->
 			<dependency>
 				<groupId>redis.clients</groupId>
@@ -320,6 +324,24 @@
 				<version>3.2.8</version>
 			</dependency>
 			<!--db-->
+
+			<!--aop tool-->
+			<dependency>
+				<groupId>aopalliance</groupId>
+				<artifactId>aopalliance</artifactId>
+				<version>1.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.aspectj</groupId>
+				<artifactId>aspectjweaver</artifactId>
+				<version>1.8.9</version>
+			</dependency>
+			<dependency>
+				<groupId>org.aspectj</groupId>
+				<artifactId>aspectjrt</artifactId>
+				<version>1.8.9</version>
+			</dependency>
+			<!--aop-->
 		</dependencies>
 	</dependencyManagement>
 

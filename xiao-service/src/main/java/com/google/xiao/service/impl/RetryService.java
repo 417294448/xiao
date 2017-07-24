@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Administrator on 2017/7/23.
+ * 重试机制
  */
 @Service
 public class RetryService  implements IRetryService{
