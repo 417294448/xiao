@@ -74,6 +74,7 @@
 			<pattern>%msg%n</pattern>
 		</layout>
 	</appender>
+	<!--AsyncCoalescingStatisticsAppender收集StopWatch的日志信息并传送到下游的文件appenders。-->
 	<appender name="coalescingStatistics" class="org.perf4j.logback.AsyncCoalescingStatisticsAppender">
 		<timeSlice>10000</timeSlice>
 		<appender-ref ref="statistics"/>

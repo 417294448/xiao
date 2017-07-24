@@ -38,8 +38,11 @@
         <property name="maxInMemorySize" value="10"/>
     </bean>
 
+    <bean id="timingAspect" class="org.perf4j.slf4j.aop.TimingAspect" />
+    <aop:aspectj-autoproxy>
+        <aop:include name="timingAspect" />
+    </aop:aspectj-autoproxy>
 
     <mvc:resources location="/assets/" mapping="/assets/**" />
-
 
 </beans>

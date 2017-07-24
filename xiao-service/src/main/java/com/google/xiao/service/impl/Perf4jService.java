@@ -14,21 +14,19 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 public class Perf4jService  implements IPerf4jService{
+
+    @Profiled
     @Override
     public void getPerfLog() throws InterruptedException {
-        StopWatch watch = new Slf4JStopWatch("No class info");
+
         log.info("this is start");
-        System.out.print("this is the content!");
-        Thread.sleep(200L);
+        for (int i = 0; i < 10; i++) {
+            StopWatch watch = new Slf4JStopWatch("the " + i);
+            Thread.sleep((long) (Math.random() * 10L));
+            watch.lap("first block");
+            Thread.sleep((long) (Math.random() * 20L));
+            watch.stop("second block");
+        }
         log.info("this is end");
-
-        printResults(100000,watch);
-    }
-
-    private void printResults(int count, StopWatch watch) {
-        log.info("Test {} took {}ms (avg. {} ns/log)", new Object[]{
-            watch.getTag(),
-            watch.getElapsedTime(),
-            watch.getElapsedTime() * 1000 * 1000 / count});
     }
 }
