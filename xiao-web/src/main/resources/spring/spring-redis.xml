@@ -15,8 +15,9 @@
         http://www.springframework.org/schema/util/spring-util-4.0.xsd"
        default-autowire="no" default-lazy-init="true">
 
-    <!-- Activates annotation-based bean configuration -->
     <context:annotation-config />
+
+<!--    <context:property-placeholder location="classpath:conf/spring/redis.properties" />-->
 
     <!-- Redis config -->
     <bean id="poolConfig" class="redis.clients.jedis.JedisPoolConfig">

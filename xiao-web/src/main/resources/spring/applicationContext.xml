@@ -20,6 +20,6 @@
     <aop:aspectj-autoproxy expose-proxy="true"/>
     <aop:config expose-proxy="true"/>
 
-    <!--<import resource="classpath*:spring/spring-db.xml"/>-->
+    <import resource="classpath*:spring/spring-redis.xml"/>
 
 </beans>
