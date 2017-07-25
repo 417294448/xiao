@@ -6,6 +6,7 @@
 	<property resource="log4j.properties"/>
 	<property name="LOG_PATH" value="${log.path}" />
 	<property name="LOG_LEVEL" value="${log.level}" />
+	<property name="LOG_ROOT_LEVEL" value="${log.root.level}" />
 
 	<!--控制台输出-->
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
@@ -94,7 +95,7 @@
 		<appender-ref ref="apiAppander" />
 	</logger>
 
-	<root level="${LOG_LEVEL}">
+	<root level="${LOG_ROOT_LEVEL}">
 		<appender-ref ref="commonLogAppender" />
 		<appender-ref ref="STDOUT" />
 	</root>
