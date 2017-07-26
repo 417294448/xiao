@@ -17,16 +17,20 @@
 
     <context:annotation-config />
 
-<!--    <context:property-placeholder location="classpath:conf/spring/redis.properties" />-->
+    <context:component-scan base-package="com.google.xiao" />
+    <context:property-placeholder location="classpath:redis.properties" ignore-unresolvable="true" file-encoding="utf-8" />
 
-    <!-- Redis config -->
+    <!-- Redis base config -->
     <bean id="poolConfig" class="redis.clients.jedis.JedisPoolConfig">
         <property name="maxIdle" value="${redis.pool.maxIdle}" />
         <property name="maxTotal" value="${redis.pool.maxTotal}" />
         <property name="maxWaitMillis" value="${redis.pool.maxWaitMillis}" />
         <property name="testOnBorrow" value="${redis.pool.testOnBorrow}" />
+        <property name="testOnReturn" value="${redis.pool.testOnReturn}" />
     </bean>
+    <!-- Redis base config -->
 
+    <!-- Redis config method 1 : use spring data redis redisTemplate-->
     <bean id="jedisConnFactory"
           class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory"
           p:usePool="true"
@@ -49,9 +53,18 @@
             <bean class="org.springframework.data.redis.serializer.StringRedisSerializer" />
         </property>
     </bean>
+    <!-- Redis config method 1 : use spring data redis-->
+
+    <!-- Redis config method 2 : use redis util-->
+    <bean id="redisUtil" class="com.google.xiao.service.redis.RedisUtils">
+        <constructor-arg name="config" ref="poolConfig"></constructor-arg>
+        <constructor-arg name="ip" value="${redis.host}"></constructor-arg>
+        <constructor-arg name="port" value="${redis.port}"></constructor-arg>
+    </bean>
+
 
     <!-- mongodb -->
-<!--    <mongo:mongo id="mongo" replica-set="${mongo.address}"></mongo:mongo>
+    <!-- <mongo:mongo id="mongo" replica-set="${mongo.address}"></mongo:mongo>
     <mongo:db-factory dbname="${mongo.dbname}" mongo-ref="mongo" />
 
     <bean id="mongoOperations" class="org.springframework.data.mongodb.core.MongoTemplate">

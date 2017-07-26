@@ -7,6 +7,7 @@ package com.google.xiao.web.controller;
 import com.google.gson.Gson;
 import com.google.xiao.domain.TestModel;
 import com.google.xiao.service.IPerf4jService;
+import com.google.xiao.service.IRedisTest;
 import com.google.xiao.service.IRetryService;
 import com.google.xiao.service.ITestService;
 import lombok.extern.slf4j.Slf4j;
@@ -32,12 +33,14 @@ public class TestController {
     @Autowired
     private ITestService testService;
 
-
     @Autowired
     private IRetryService retryService;
 
     @Autowired
     private IPerf4jService perf4jService;
+
+    @Autowired
+    private IRedisTest redisTest;
 
     /**
      * test lombok
@@ -88,5 +91,12 @@ public class TestController {
         perf4jService.getPerfLog();
         log.info("log in controller end");
         return "perf4j" ;
+    }
+
+    @RequestMapping(value = "/getRedisValue", method = RequestMethod.GET)
+    @ResponseBody
+    public String getRedisValue(){
+        redisTest.setValue("mytest", "1111");
+        return redisTest.getValue("mytest");
     }
 }

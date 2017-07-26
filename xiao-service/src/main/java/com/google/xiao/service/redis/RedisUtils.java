@@ -17,60 +17,55 @@ import java.util.concurrent.ConcurrentHashMap;
  * redis相关接口
  */
 
-
 @Slf4j
-public class RedisUtil {
-    private JedisPool pool = null;
+@Service
+public class RedisUtils {
+    private JedisPoolConfig config;
+    private String ip;
+    private int port;
 
-    /**
-     * 传入ip和端口号构建redis 连接池
-     * @param ip  ip
-     * @param prot  端口
-     */
-    public RedisUtil(String ip, int prot) {
-        if (pool == null) {
-            JedisPoolConfig config = new JedisPoolConfig();
+    private JedisPool pool;
 
-            pool = new JedisPool(config, ip, prot, 100000);
-        }
+    public JedisPoolConfig getConfig() {
+        return config;
+    }
+
+    public void setConfig(JedisPoolConfig config) {
+        this.config = config;
+    }
+
+    public String getIp() {
+        return ip;
+    }
+
+    public void setIp(String ip) {
+        this.ip = ip;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
     }
 
     /**
      * 通过配置对象 ip 端口 构建连接池
      * @param config   配置对象
      * @param ip  ip
-     * @param prot  端口
+     * @param port  端口
      */
-    public RedisUtil(JedisPoolConfig config, String ip, int prot) {
+    public RedisUtils(JedisPoolConfig config, String ip, int port) {
+        this.config = config;
+        this.ip = ip;
+        this.port = port;
         if (pool == null) {
-            pool = new JedisPool(config, ip, prot, 10000);
+            pool = new JedisPool(config, ip, port, 10000);
         }
     }
 
-    /**
-     * 通过配置对象 ip 端口 超时时间 构建连接池
-     *
-     * @param config  配置对象
-     * @param ip  ip
-     * @param prot  端口
-     * @param timeout  超时时间
-     */
-    public RedisUtil(JedisPoolConfig config, String ip, int prot, int timeout) {
-        if (pool == null) {
-            pool = new JedisPool(config, ip, prot, timeout);
-        }
-    }
-
-    /**
-     * 通过连接池对象 构建一个连接池
-     *
-     * @param pool 连接池对象
-     */
-    public RedisUtil(JedisPool pool) {
-        if (this.pool == null) {
-            this.pool = pool;
-        }
-    }
+    public RedisUtils(){}
 
     /**
      * 通过key获取储存在redis中的value
