@@ -1,18 +1,37 @@
 package com.google.xiao.service.redis;
 
-import com.google.gson.Gson;
+import java.io.Serializable;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import javax.annotation.Resource;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.*;
+import org.springframework.data.redis.core.HashOperations;
+import org.springframework.data.redis.core.ListOperations;
+import org.springframework.data.redis.core.RedisOperations;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.SetOperations;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.io.Serializable;
-import java.lang.reflect.Type;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
+import com.google.gson.Gson;
+
 
 /**
  * Created by xiaoshuang on 2017/7/26.
+ *
+ * doc http://www.jianshu.com/p/7bf5dc61ca06
  *
  * 利用 redisTemplate 方式
  */
@@ -20,522 +39,518 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class RedisService {
 
-        @Autowired
-        private RedisTemplate<Serializable, Serializable> redisTemplate;
+    @Resource(name = "redisTemplate")
+    private RedisTemplate<Serializable, Serializable> template;
+    //RedisTemplate还提供了对应的*OperationsEditor，用来通过RedisTemplate直接注入对应的Operation。
+    @Resource(name = "redisTemplate")
+    private ListOperations<Serializable, Serializable> listOps;
 
-        private ListOperations<Serializable, Serializable> getListOps() {
-            return redisTemplate.opsForList();
+    @Resource(name = "redisTemplate")
+    private HashOperations<Serializable, Serializable, Serializable> hashOps;
+
+    @Resource(name = "redisTemplate")
+    private ValueOperations<String, Serializable> valueOps;
+
+    @Resource(name = "redisTemplate")
+    private SetOperations<String, String> setOps;
+
+    @Resource(name = "redisTemplate")
+    private ZSetOperations<String, Serializable> zsetOps;
+
+    private static Gson GSON = new Gson();
+
+    /**
+     *
+     * @param pattern
+     * @return
+     * @deprecated
+     */
+    public Set<String> getKeys(String pattern) {
+        Set<Serializable> keys = template.keys(pattern);
+        Set<String> set = new HashSet<String>(keys.size());
+        for (Serializable s : keys) {
+            set.add((String) s);
+        }
+        return set;
+    }
+
+    public <T> List<T> range(String key, long start, long end, Class<T> clazz) {
+        List<Serializable> list = listOps.range(key, start, end);
+        List<T> results = new ArrayList<T>(list.size());
+        for (Serializable e : list) {
+            results.add(GSON.fromJson((String) e, clazz));
         }
 
-        private HashOperations<Serializable, Serializable, Serializable> getHashOps() {
-            return redisTemplate.opsForHash();
-        }
+        return results;
+    }
 
-        private ValueOperations<Serializable, Serializable>  getValueOps() {
-            return redisTemplate.opsForValue();
-        }
+    public void trim(Serializable key, long start, long end) {
+        listOps.trim(key, start, end);
+    }
 
-        private SetOperations<Serializable, Serializable> getSetOps() {
-            return redisTemplate.opsForSet();
-        }
+    public Long size(Serializable key) {
+        return listOps.size(key);
+    }
 
-        private ZSetOperations<Serializable, Serializable> getZsetOps() {
-            return redisTemplate.opsForZSet();
-        }
+    public Long leftPush(String key, Object value) {
+        String json = GSON.toJson(value);
+        return listOps.leftPush(key, json);
+    }
 
-        private static Gson GSON = new Gson();
+    public Long leftPushIfPresent(String key, Object value) {
+        String json = GSON.toJson(value);
+        return listOps.leftPushIfPresent(key, json);
+    }
 
-        /**
-         *
-         * @param pattern
-         * @return
-         * @deprecated
-         */
-        public Set<String> getKeys(String pattern) {
-            Set<Serializable> keys = redisTemplate.keys(pattern);
-            Set<String> set = new HashSet<String>(keys.size());
-            for (Serializable s : keys) {
-                set.add((String) s);
-            }
-            return set;
-        }
+    public Long leftPush(String key, Serializable pivot, Object value) {
+        String json = GSON.toJson(value);
+        return listOps.leftPush(key, pivot, json);
+    }
 
-        public <T> List<T> range(String key, long start, long end, Class<T> clazz) {
-            List<Serializable> list = getListOps().range(key, start, end);
-            List<T> results = new ArrayList<T>(list.size());
-            for (Serializable e : list) {
-                results.add(GSON.fromJson((String) e, clazz));
-            }
+    public Long rightPush(String key, Object value) {
+        String json = GSON.toJson(value);
+        return listOps.rightPush(key, json);
+    }
 
-            return results;
-        }
+    public Long rightPushIfPresent(String key, Object value) {
+        String json = GSON.toJson(value);
+        return listOps.rightPushIfPresent(key, json);
+    }
 
-        public void trim(Serializable key, long start, long end) {
-            getListOps().trim(key, start, end);
-        }
+    public Long rightPush(String key, Serializable pivot, Object value) {
+        String json = GSON.toJson(value);
+        return listOps.rightPush(key, pivot, json);
+    }
 
-        public Long size(Serializable key) {
-            return getListOps().size(key);
-        }
+    public void set(String key, long index, Object value) {
+        String json = GSON.toJson(value);
+        listOps.set(key, index, json);
+    }
 
-        public Long leftPush(String key, Object value) {
-            String json = GSON.toJson(value);
-            return getListOps().leftPush(key, json);
-        }
+    public Long remove(String key, long i, Object value) {
+        String json = GSON.toJson(value);
+        return listOps.remove(key, i, json);
+    }
 
-        public Long leftPushIfPresent(String key, Object value) {
-            String json = GSON.toJson(value);
-            return getListOps().leftPushIfPresent(key, json);
-        }
+    public <T> T index(String key, long index, Class<T> classOfT) {
+        String json = (String) listOps.index(key, index);
+        return GSON.fromJson(json, classOfT);
+    }
 
-        public Long leftPush(String key, Serializable pivot, Object value) {
-            String json = GSON.toJson(value);
-            return getListOps().leftPush(key, pivot, json);
-        }
+    public <T> T leftPop(String key, Class<T> classOfT) {
+        String json = (String) listOps.leftPop(key);
+        return GSON.fromJson(json, classOfT);
+    }
 
-        public Long rightPush(String key, Object value) {
-            String json = GSON.toJson(value);
-            return getListOps().rightPush(key, json);
-        }
+    public <T> T leftPop(String key, long timeout, TimeUnit unit,
+                         Class<T> classOfT) {
+        String json = (String) listOps.leftPop(key, timeout, unit);
+        return GSON.fromJson(json, classOfT);
+    }
 
-        public Long rightPushIfPresent(String key, Object value) {
-            String json = GSON.toJson(value);
-            return getListOps().rightPushIfPresent(key, json);
-        }
+    public <T> T rightPop(Serializable key, Class<T> classOfT) {
+        String json = (String) listOps.rightPop(key);
+        return GSON.fromJson(json, classOfT);
+    }
 
-        public Long rightPush(String key, Serializable pivot, Object value) {
-            String json = GSON.toJson(value);
-            return getListOps().rightPush(key, pivot, json);
-        }
+    public <T> T rightPop(String key, long timeout, TimeUnit unit,
+                          Class<T> classOfT) {
+        String json = (String) listOps.rightPop(key, timeout, unit);
+        return GSON.fromJson(json, classOfT);
+    }
 
-        public void set(String key, long index, Object value) {
-            String json = GSON.toJson(value);
-            getListOps().set(key, index, json);
-        }
+    public <T> T rightPopAndLeftPush(String sourceKey, String destinationKey,
+                                     Class<T> classOfT) {
+        String json = (String) listOps.rightPopAndLeftPush(sourceKey,
+                destinationKey);
+        return GSON.fromJson(json, classOfT);
+    }
 
-        public Long remove(String key, long i, Object value) {
-            String json = GSON.toJson(value);
-            return getListOps().remove(key, i, json);
-        }
+    public <T> T rightPopAndLeftPush(Serializable sourceKey,
+                                     Serializable destinationKey, long timeout, TimeUnit unit,
+                                     Class<T> classOfT) {
+        String json = (String) listOps.rightPopAndLeftPush(sourceKey,
+                destinationKey, timeout, unit);
+        return GSON.fromJson(json, classOfT);
+    }
 
-        public <T> T index(String key, long index, Class<T> classOfT) {
-            String json = (String) getListOps().index(key, index);
-            return GSON.fromJson(json, classOfT);
-        }
+    public Boolean setIfAbsent(String key, Serializable value) {
+        return valueOps.setIfAbsent(key, value);
+    }
 
-        public <T> T leftPop(String key, Class<T> classOfT) {
-            String json = (String) getListOps().leftPop(key);
-            return GSON.fromJson(json, classOfT);
-        }
+    public RedisOperations<Serializable, Serializable> getOperations() {
+        return listOps.getOperations();
+    }
 
-        public <T> T leftPop(String key, long timeout, TimeUnit unit,
-                             Class<T> classOfT) {
-            String json = (String) getListOps().leftPop(key, timeout, unit);
-            return GSON.fromJson(json, classOfT);
-        }
+    /**
+     *
+     * @param key
+     * @param hkey
+     * @return
+     */
+    public <T> T mget(String key, Object hkey, Class<T> classOfT) {
+        String json = (String) hashOps.get(key, hkey);
+        return GSON.fromJson(json, classOfT);
+    }
 
-        public <T> T rightPop(Serializable key, Class<T> classOfT) {
-            String json = (String) getListOps().rightPop(key);
-            return GSON.fromJson(json, classOfT);
-        }
+    /**
+     *
+     * @param key
+     * @param hkey
+     * @return
+     */
+    public Integer mgetInteger(String key, Object hkey) {
+        String json = (String) hashOps.get(key, hkey);
+        String value = GSON.fromJson(json, String.class);
+        return Integer.parseInt(value);
+    }
 
-        public <T> T rightPop(String key, long timeout, TimeUnit unit,
-                              Class<T> classOfT) {
-            String json = (String) getListOps().rightPop(key, timeout, unit);
-            return GSON.fromJson(json, classOfT);
-        }
+    /**
+     *
+     * @param key
+     * @param hkey
+     * @return
+     */
+    public Long mgetLong(String key, Object hkey) {
+        String json = (String) hashOps.get(key, hkey);
+        String value = GSON.fromJson(json, String.class);
+        return Long.parseLong(value);
+    }
 
-        public <T> T rightPopAndLeftPush(String sourceKey, String destinationKey,
-                                         Class<T> classOfT) {
-            String json = (String) getListOps().rightPopAndLeftPush(sourceKey,
-                    destinationKey);
-            return GSON.fromJson(json, classOfT);
-        }
+    /**
+     *
+     * @param key
+     * @param hkey
+     * @return
+     */
+    public Double mgetDouble(String key, Object hkey) {
+        String json = (String) hashOps.get(key, hkey);
+        String value = GSON.fromJson(json, String.class);
+        return Double.parseDouble(value);
+    }
 
-        public <T> T rightPopAndLeftPush(Serializable sourceKey,
-                                         Serializable destinationKey, long timeout, TimeUnit unit,
-                                         Class<T> classOfT) {
-            String json = (String) getListOps().rightPopAndLeftPush(sourceKey,
-                    destinationKey, timeout, unit);
-            return GSON.fromJson(json, classOfT);
-        }
+    /**
+     *
+     * @param key
+     * @param hkey
+     * @return
+     */
+    public Float mgetFloat(String key, Object hkey) {
+        String json = (String) hashOps.get(key, hkey);
+        String value = GSON.fromJson(json, String.class);
+        return Float.parseFloat(value);
+    }
 
-        public Boolean setIfAbsent(String key, Serializable value) {
-            return getValueOps().setIfAbsent(key, value);
-        }
-
-        public RedisOperations<Serializable, Serializable> getOperations() {
-            return getListOps().getOperations();
-        }
-
-        /**
-         *
-         * @param key
-         * @param hkey
-         * @return
-         */
-        public <T> T mget(String key, Object hkey, Class<T> classOfT) {
-            String json = (String) getHashOps().get(key, hkey);
-            return GSON.fromJson(json, classOfT);
-        }
-
-        /**
-         *
-         * @param key
-         * @param hkey
-         * @return
-         */
-        public Integer mgetInteger(String key, Object hkey) {
-            String json = (String) getHashOps().get(key, hkey);
-            String value = GSON.fromJson(json, String.class);
-            return Integer.parseInt(value);
-        }
-
-        /**
-         *
-         * @param key
-         * @param hkey
-         * @return
-         */
-        public Long mgetLong(String key, Object hkey) {
-            String json = (String) getHashOps().get(key, hkey);
-            String value = GSON.fromJson(json, String.class);
-            return Long.parseLong(value);
-        }
-
-        /**
-         *
-         * @param key
-         * @param hkey
-         * @return
-         */
-        public Double mgetDouble(String key, Object hkey) {
-            String json = (String) getHashOps().get(key, hkey);
-            String value = GSON.fromJson(json, String.class);
-            return Double.parseDouble(value);
-        }
-
-        /**
-         *
-         * @param key
-         * @param hkey
-         * @return
-         */
-        public Float mgetFloat(String key, Object hkey) {
-            String json = (String) getHashOps().get(key, hkey);
-            String value = GSON.fromJson(json, String.class);
-            return Float.parseFloat(value);
-        }
-
-        /**
-         *
-         * @param key
-         * @param hkey
-         * @param hvalue
-         */
-        public void mput(String key, Serializable hkey, Object hvalue) {
-            String json = GSON.toJson(String.valueOf(hvalue));
-            getHashOps().put(key, hkey, json);
-        }
+    /**
+     *
+     * @param key
+     * @param hkey
+     * @param hvalue
+     */
+    public void mput(String key, Serializable hkey, Object hvalue) {
+        String json = GSON.toJson(String.valueOf(hvalue));
+        hashOps.put(key, hkey, json);
+    }
 
 	/*
 	 * public void mputAll(Serializable key, Map<? extends Serializable, ?
 	 * extends Serializable> map) { hashOps.putAll(key, map); }
 	 */
 
-        public void putIfAbsent(Serializable key, Serializable hkey, Object hvalue) {
-            String json = GSON.toJson(hvalue);
-            getHashOps().putIfAbsent(key, hkey, json);
+    public void putIfAbsent(Serializable key, Serializable hkey, Object hvalue) {
+        String json = GSON.toJson(hvalue);
+        hashOps.putIfAbsent(key, hkey, json);
+    }
+
+    /**
+     *
+     * @param key
+     * @param hkey
+     */
+    public void mdelete(Serializable key, Object hkey) {
+        hashOps.delete(key, hkey);
+    }
+
+    /**
+     *
+     * @param key
+     * @param hkeys
+     * @return
+     */
+    public <T> List<T> mmultiGet(Serializable key,
+                                 Collection<Serializable> hkeys, Class<T> classOfT) {
+        List<Serializable> list = hashOps.multiGet(key, hkeys);
+        List<T> results = new ArrayList<T>();
+        for (Serializable e : list) {
+            results.add(GSON.fromJson((String) e, classOfT));
+        }
+        return results;
+    }
+
+    /**
+     *
+     * @param key
+     * @return
+     */
+    public <T> Map<Serializable, T> mentries(Serializable key, Class<T> classOfT) {
+        Map<Serializable, Serializable> map = hashOps.entries(key);
+
+        Map<Serializable, T> resultMap = new HashMap<Serializable, T>();
+        for (Map.Entry<Serializable, Serializable> e : map.entrySet()) {
+            resultMap.put(e.getKey(),
+                    GSON.fromJson((String) e.getValue(), classOfT));
         }
 
-        /**
-         *
-         * @param key
-         * @param hkey
-         */
-        public void mdelete(Serializable key, Object hkey) {
-            getHashOps().delete(key, hkey);
+        return resultMap;
+    }
+
+    /**
+     *
+     * @param key
+     * @return
+     */
+    public Map<Serializable, Integer> mentriesInteger(Serializable key) {
+        Map<Serializable, Serializable> map = hashOps.entries(key);
+
+        Map<Serializable, Integer> resultMap = new HashMap<Serializable, Integer>();
+        String json = null;
+        for (Map.Entry<Serializable, Serializable> e : map.entrySet()) {
+            json = GSON.fromJson((String) e.getValue(), String.class);
+            resultMap.put(e.getKey(), Integer.parseInt(json));
         }
 
-        /**
-         *
-         * @param key
-         * @param hkeys
-         * @return
-         */
-        public <T> List<T> mmultiGet(Serializable key,
-                                     Collection<Serializable> hkeys, Class<T> classOfT) {
-            List<Serializable> list = getHashOps().multiGet(key, hkeys);
-            List<T> results = new ArrayList<T>();
-            for (Serializable e : list) {
-                results.add(GSON.fromJson((String) e, classOfT));
-            }
-            return results;
+        return resultMap;
+    }
+
+    /**
+     *
+     * @param key
+     * @return
+     */
+    public Map<Serializable, Long> mentriesLong(Serializable key) {
+        Map<Serializable, Serializable> map = hashOps.entries(key);
+
+        Map<Serializable, Long> resultMap = new HashMap<Serializable, Long>();
+        String json = null;
+        for (Map.Entry<Serializable, Serializable> e : map.entrySet()) {
+            json = GSON.fromJson((String) e.getValue(), String.class);
+            resultMap.put(e.getKey(), Long.parseLong(json));
         }
 
-        /**
-         *
-         * @param key
-         * @return
-         */
-        public <T> Map<Serializable, T> mentries(Serializable key, Class<T> classOfT) {
-            Map<Serializable, Serializable> map = getHashOps().entries(key);
+        return resultMap;
+    }
 
-            Map<Serializable, T> resultMap = new HashMap<Serializable, T>();
-            for (Map.Entry<Serializable, Serializable> e : map.entrySet()) {
-                resultMap.put(e.getKey(),
-                        GSON.fromJson((String) e.getValue(), classOfT));
-            }
+    /**
+     *
+     * @param key
+     * @return
+     */
+    public Map<Serializable, Double> mentriesDouble(Serializable key) {
+        Map<Serializable, Serializable> map = hashOps.entries(key);
 
-            return resultMap;
+        Map<Serializable, Double> resultMap = new HashMap<Serializable, Double>();
+        String json = null;
+        for (Map.Entry<Serializable, Serializable> e : map.entrySet()) {
+            json = GSON.fromJson((String) e.getValue(), String.class);
+            resultMap.put(e.getKey(), Double.parseDouble(json));
         }
 
-        /**
-         *
-         * @param key
-         * @return
-         */
-        public Map<Serializable, Integer> mentriesInteger(Serializable key) {
-            Map<Serializable, Serializable> map = getHashOps().entries(key);
+        return resultMap;
+    }
 
-            Map<Serializable, Integer> resultMap = new HashMap<Serializable, Integer>();
-            String json = null;
-            for (Map.Entry<Serializable, Serializable> e : map.entrySet()) {
-                json = GSON.fromJson((String) e.getValue(), String.class);
-                resultMap.put(e.getKey(), Integer.parseInt(json));
-            }
+    /**
+     *
+     * @param key
+     * @return
+     */
+    public Map<Serializable, Float> mentriesFloat(Serializable key) {
+        Map<Serializable, Serializable> map = hashOps.entries(key);
 
-            return resultMap;
+        Map<Serializable, Float> resultMap = new HashMap<Serializable, Float>();
+        String json = null;
+        for (Map.Entry<Serializable, Serializable> e : map.entrySet()) {
+            json = GSON.fromJson((String) e.getValue(), String.class);
+            resultMap.put(e.getKey(), Float.parseFloat(json));
         }
 
-        /**
-         *
-         * @param key
-         * @return
-         */
-        public Map<Serializable, Long> mentriesLong(Serializable key) {
-            Map<Serializable, Serializable> map = getHashOps().entries(key);
+        return resultMap;
+    }
 
-            Map<Serializable, Long> resultMap = new HashMap<Serializable, Long>();
-            String json = null;
-            for (Map.Entry<Serializable, Serializable> e : map.entrySet()) {
-                json = GSON.fromJson((String) e.getValue(), String.class);
-                resultMap.put(e.getKey(), Long.parseLong(json));
-            }
+    /**
+     *
+     * @param key
+     * @param hkey
+     * @return
+     */
+    public boolean mhasKey(Serializable key, Object hkey) {
+        return hashOps.hasKey(key, hkey);
+    }
 
-            return resultMap;
+    /**
+     *
+     * @param key
+     * @param value
+     */
+    public void set(String key, Object value) {
+        String json = GSON.toJson(value);
+        valueOps.set(key, json);
+    }
+
+    /**
+     *
+     * @param key
+     * @param value
+     * @param timeout
+     * @param unit
+     */
+    public void set(String key, Object value, long timeout, TimeUnit unit) {
+        valueOps.set(key, GSON.toJson(value), timeout, unit);
+    }
+
+    public String get(String key) {
+        Serializable value = valueOps.get(key);
+        if(value == null) {
+            return null;
         }
 
-        /**
-         *
-         * @param key
-         * @return
-         */
-        public Map<Serializable, Double> mentriesDouble(Serializable key) {
-            Map<Serializable, Serializable> map = getHashOps().entries(key);
+        String v = (String)value;
 
-            Map<Serializable, Double> resultMap = new HashMap<Serializable, Double>();
-            String json = null;
-            for (Map.Entry<Serializable, Serializable> e : map.entrySet()) {
-                json = GSON.fromJson((String) e.getValue(), String.class);
-                resultMap.put(e.getKey(), Double.parseDouble(json));
-            }
+        return v;
+    }
 
-            return resultMap;
+    public <T> T get(String key, Class<T> classOfT) {
+        Serializable value = valueOps.get(key);
+        if (value == null) {
+            return null;
         }
 
-        /**
-         *
-         * @param key
-         * @return
-         */
-        public Map<Serializable, Float> mentriesFloat(Serializable key) {
-            Map<Serializable, Serializable> map = getHashOps().entries(key);
+        String v = (String) value;
 
-            Map<Serializable, Float> resultMap = new HashMap<Serializable, Float>();
-            String json = null;
-            for (Map.Entry<Serializable, Serializable> e : map.entrySet()) {
-                json = GSON.fromJson((String) e.getValue(), String.class);
-                resultMap.put(e.getKey(), Float.parseFloat(json));
-            }
+        return GSON.fromJson(v, classOfT);
+    }
 
-            return resultMap;
+    /**
+     *
+     * @param key
+     * @param v
+     */
+    public void increment(String key, long v) {
+        this.valueOps.increment(key, v);
+    }
+
+    public void sadd(String key, String value) {
+        setOps.add(key, value);
+    }
+
+    public void sremove(String key, String value) {
+        setOps.remove(key, value);
+    }
+
+    public Set<String> smembers(String key) {
+        return setOps.members(key);
+    }
+
+    public boolean zadd(String key, Serializable value, Double order) {
+        return zsetOps.add(key, value, order);
+    }
+
+    public long zcount(String key, Double start, Double end) {
+        return zsetOps.count(key, start, end);
+    }
+
+    public Set<Serializable> zrange(String key, long start, long end) {
+        return zsetOps.range(key, start, end);
+    }
+
+    public Set<Serializable> zrange(String key, double start, double end) {
+        return zsetOps.rangeByScore(key, start, end);
+    }
+
+    public void zremove(String key, Object obj) {
+        zsetOps.remove(key, obj);
+    }
+
+    /**
+     *
+     * @param key
+     */
+    public void delete(Serializable key) {
+        this.template.delete(key);
+    }
+
+    /**
+     *
+     * @param key
+     * @param timeout
+     * @param unit
+     */
+    public void expire(Serializable key, long timeout, TimeUnit unit) {
+        this.template.expire(key, timeout, unit);
+    }
+
+    /**
+     *
+     * @param key
+     * @param date
+     */
+    public void expireAt(Serializable key, Date date) {
+        this.template.expireAt(key, date);
+    }
+
+    public Boolean hasKey(Serializable key) {
+        return template.hasKey(key);
+    }
+
+    public RedisTemplate<Serializable, Serializable> getTemplate() {
+        return template;
+    }
+
+    public void setTemplate(RedisTemplate<Serializable, Serializable> template) {
+        this.template = template;
+    }
+
+    public Set<String> members(String key) {
+        return setOps.members(key);
+    }
+
+    public void delete(String key) {
+        template.delete(key);
+    }
+
+    public <T> T hget(String key, String hashKey, Class<T> classOfT) {
+        Serializable value = hashOps.get(key, hashKey);
+        if (value == null) {
+            return null;
         }
 
-        /**
-         *
-         * @param key
-         * @param hkey
-         * @return
-         */
-        public boolean mhasKey(Serializable key, Object hkey) {
-            return getHashOps().hasKey(key, hkey);
+        return GSON.fromJson((String) value, classOfT);
+    }
+
+    public <T> T hget(String key, String hashKey, Type type) {
+        Serializable value = hashOps.get(key, hashKey);
+        if (value == null) {
+            return null;
         }
 
-        /**
-         *
-         * @param key
-         * @param value
-         */
-        public void set(String key, Object value) {
-            String json = GSON.toJson(value);
-            getValueOps().set(key, json);
-        }
+        return GSON.fromJson((String) value, type);
+    }
 
-        /**
-         *
-         * @param key
-         * @param value
-         * @param timeout
-         * @param unit
-         */
-        public void set(String key, Object value, long timeout, TimeUnit unit) {
-            getValueOps().set(key, GSON.toJson(value), timeout, unit);
-        }
+    public void hput(String key, Map<? extends Serializable, String> map) {
+        if (CollectionUtils.isEmpty(map))
+            return;
+        hashOps.putAll(key, map);
+    }
 
-        public String get(String key) {
-            Serializable value = getValueOps().get(key);
-            if(value == null) {
-                return null;
-            }
+    public void hset(String key, String hashKey, Object value) {
+        hashOps.put(key, hashKey, GSON.toJson(value));
+    }
 
-            String v = (String)value;
+    public void expire(String key, long timeout, TimeUnit timeUnit) {
+        template.expire(key, timeout, timeUnit);
+    }
 
-            return v;
-        }
+    public boolean exists(String key) {
+        return false;
+    }
 
-        public <T> T get(String key, Class<T> classOfT) {
-            Serializable value = getValueOps().get(key);
-            if (value == null) {
-                return null;
-            }
-
-            String v = (String) value;
-
-            return GSON.fromJson(v, classOfT);
-        }
-
-        /**
-         *
-         * @param key
-         * @param v
-         */
-        public void increment(String key, long v) {
-            this.getValueOps().increment(key, v);
-        }
-
-        public void sadd(String key, String value) {
-            getSetOps().add(key, value);
-        }
-
-        public void sremove(String key, String value) {
-            getSetOps().remove(key, value);
-        }
-
-        public Set<Serializable> smembers(String key) {
-            return getSetOps().members(key);
-        }
-
-        public boolean zadd(String key, Serializable value, Double order) {
-            return getZsetOps().add(key, value, order);
-        }
-
-        public long zcount(String key, Double start, Double end) {
-            return getZsetOps().count(key, start, end);
-        }
-
-        public Set<Serializable> zrange(String key, long start, long end) {
-            return getZsetOps().range(key, start, end);
-        }
-
-        public Set<Serializable> zrange(String key, double start, double end) {
-            return getZsetOps().rangeByScore(key, start, end);
-        }
-
-        public void zremove(String key, Object obj) {
-            getZsetOps().remove(key, obj);
-        }
-
-        /**
-         *
-         * @param key
-         */
-        public void delete(Serializable key) {
-            this.redisTemplate.delete(key);
-        }
-
-        /**
-         *
-         * @param key
-         * @param timeout
-         * @param unit
-         */
-        public void expire(Serializable key, long timeout, TimeUnit unit) {
-            this.redisTemplate.expire(key, timeout, unit);
-        }
-
-        /**
-         *
-         * @param key
-         * @param date
-         */
-        public void expireAt(Serializable key, Date date) {
-            this.redisTemplate.expireAt(key, date);
-        }
-
-        public Boolean hasKey(Serializable key) {
-            return redisTemplate.hasKey(key);
-        }
-
-        public RedisTemplate<Serializable, Serializable> getTemplate() {
-            return redisTemplate;
-        }
-
-        public void setTemplate(RedisTemplate<Serializable, Serializable> template) {
-            this.redisTemplate = template;
-        }
-
-        public Set<Serializable> members(String key) {
-            return getSetOps().members(key);
-        }
-
-        public void delete(String key) {
-            redisTemplate.delete(key);
-        }
-
-        public <T> T hget(String key, String hashKey, Class<T> classOfT) {
-            Serializable value = getHashOps().get(key, hashKey);
-            if (value == null) {
-                return null;
-            }
-
-            return GSON.fromJson((String) value, classOfT);
-        }
-
-        public <T> T hget(String key, String hashKey, Type type) {
-            Serializable value = getHashOps().get(key, hashKey);
-            if (value == null) {
-                return null;
-            }
-
-            return GSON.fromJson((String) value, type);
-        }
-
-        public void hput(String key, Map<? extends Serializable, String> map) {
-            if (CollectionUtils.isEmpty(map))
-                return;
-            getHashOps().putAll(key, map);
-        }
-
-        public void hset(String key, String hashKey, Object value) {
-            getHashOps().put(key, hashKey, GSON.toJson(value));
-        }
-
-        public void expire(String key, long timeout, TimeUnit timeUnit) {
-            redisTemplate.expire(key, timeout, timeUnit);
-        }
-
-        public boolean exists(String key) {
-            return false;
-        }
 }
