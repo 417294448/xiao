@@ -17,7 +17,6 @@
 
     <context:annotation-config />
 
-    <context:component-scan base-package="com.google.xiao" />
     <context:property-placeholder location="classpath:redis.properties" ignore-unresolvable="true" file-encoding="utf-8" />
 
     <!-- Redis base config -->

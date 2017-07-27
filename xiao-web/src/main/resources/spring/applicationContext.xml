@@ -15,8 +15,6 @@
         http://www.springframework.org/schema/util/spring-util-4.0.xsd"
        default-autowire="no" default-lazy-init="true">
 
-    <context:component-scan base-package="com.google.xiao" />
-
     <aop:aspectj-autoproxy expose-proxy="true"/>
     <aop:config expose-proxy="true"/>
 
