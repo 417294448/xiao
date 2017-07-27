@@ -1,6 +1,7 @@
 package com.google.xiao.service.redis;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import redis.clients.jedis.BinaryClient;
 import redis.clients.jedis.Jedis;
@@ -20,52 +21,9 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 @Service
 public class RedisUtils {
-    private JedisPoolConfig config;
-    private String ip;
-    private int port;
 
-    private JedisPool pool;
-
-    public JedisPoolConfig getConfig() {
-        return config;
-    }
-
-    public void setConfig(JedisPoolConfig config) {
-        this.config = config;
-    }
-
-    public String getIp() {
-        return ip;
-    }
-
-    public void setIp(String ip) {
-        this.ip = ip;
-    }
-
-    public int getPort() {
-        return port;
-    }
-
-    public void setPort(int port) {
-        this.port = port;
-    }
-
-    /**
-     * 通过配置对象 ip 端口 构建连接池
-     * @param config   配置对象
-     * @param ip  ip
-     * @param port  端口
-     */
-    public RedisUtils(JedisPoolConfig config, String ip, int port) {
-        this.config = config;
-        this.ip = ip;
-        this.port = port;
-        if (pool == null) {
-            pool = new JedisPool(config, ip, port, 10000);
-        }
-    }
-
-    public RedisUtils(){}
+    @Autowired
+    private JedisPool jedisPool;
 
     /**
      * 通过key获取储存在redis中的value
@@ -78,13 +36,13 @@ public class RedisUtils {
         Jedis jedis = null;
         String value = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             value = jedis.get(key);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return value;
     }
@@ -100,14 +58,14 @@ public class RedisUtils {
     public String set(String key, String value) {
         Jedis jedis = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             return jedis.set(key, value);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
             return "0";
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
     }
 
@@ -120,14 +78,14 @@ public class RedisUtils {
     public Long del(String... keys) {
         Jedis jedis = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             return jedis.del(keys);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
             return 0L;
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
     }
 
@@ -142,14 +100,14 @@ public class RedisUtils {
         Jedis jedis = null;
         Long res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.append(key, str);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
             return 0L;
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -163,14 +121,14 @@ public class RedisUtils {
     public Boolean exists(String key) {
         Jedis jedis = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             return jedis.exists(key);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
             return false;
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
     }
 
@@ -183,14 +141,14 @@ public class RedisUtils {
     public Long setnx(String key, String value) {
         Jedis jedis = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             return jedis.setnx(key, value);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
             return 0L;
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
     }
 
@@ -206,13 +164,13 @@ public class RedisUtils {
         Jedis jedis = null;
         String res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.setex(key, seconds, value);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -235,14 +193,14 @@ public class RedisUtils {
     public Long setrange(String key, String str, int offset) {
         Jedis jedis = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             return jedis.setrange(key, offset, str);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
             return 0L;
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
     }
 
@@ -256,13 +214,13 @@ public class RedisUtils {
         Jedis jedis = null;
         List<String> values = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             values = jedis.mget(keys);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return values;
     }
@@ -280,13 +238,13 @@ public class RedisUtils {
         Jedis jedis = null;
         String res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.mset(keysvalues);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -303,13 +261,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Long res = 0L;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.msetnx(keysvalues);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -325,13 +283,13 @@ public class RedisUtils {
         Jedis jedis = null;
         String res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.getSet(key, value);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -349,13 +307,13 @@ public class RedisUtils {
         Jedis jedis = null;
         String res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.getrange(key, startOffset, endOffset);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -370,13 +328,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Long res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.incr(key);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -392,13 +350,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Long res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.incrBy(key, integer);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -413,13 +371,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Long res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.decr(key);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -435,13 +393,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Long res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.decrBy(key, integer);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -456,13 +414,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Long res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.strlen(key);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -479,13 +437,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Long res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.hset(key, field, value);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -502,13 +460,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Long res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.hsetnx(key, field, value);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -524,13 +482,13 @@ public class RedisUtils {
         Jedis jedis = null;
         String res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.hmset(key, hash);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -546,13 +504,13 @@ public class RedisUtils {
         Jedis jedis = null;
         String res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.hget(key, field);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -569,13 +527,13 @@ public class RedisUtils {
         Jedis jedis = null;
         List<String> res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.hmget(key, fields);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -592,13 +550,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Long res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.hincrBy(key, field, value);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -614,13 +572,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Boolean res = false;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.hexists(key, field);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -635,13 +593,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Long res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.hlen(key);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
 
@@ -659,13 +617,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Long res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.hdel(key, fields);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -680,13 +638,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Set<String> res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.hkeys(key);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -701,13 +659,13 @@ public class RedisUtils {
         Jedis jedis = null;
         List<String> res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.hvals(key);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -722,13 +680,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Map<String, String> res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.hgetAll(key);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -747,13 +705,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Long res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.lpush(key, strs);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -772,13 +730,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Long res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.rpush(key, strs);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -801,13 +759,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Long res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.linsert(key, where, pivot, value);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -830,13 +788,13 @@ public class RedisUtils {
         Jedis jedis = null;
         String res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.lset(key, index, value);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -856,13 +814,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Long res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.lrem(key, count, value);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -881,13 +839,13 @@ public class RedisUtils {
         Jedis jedis = null;
         String res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.ltrim(key, start, end);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -904,13 +862,13 @@ public class RedisUtils {
         Jedis jedis = null;
         String res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.lpop(key);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -927,13 +885,13 @@ public class RedisUtils {
         Jedis jedis = null;
         String res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.rpop(key);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -954,13 +912,13 @@ public class RedisUtils {
         Jedis jedis = null;
         String res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.rpoplpush(srckey, dstkey);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -978,13 +936,13 @@ public class RedisUtils {
         Jedis jedis = null;
         String res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.lindex(key, index);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -1001,13 +959,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Long res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.llen(key);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -1029,13 +987,13 @@ public class RedisUtils {
         Jedis jedis = null;
         List<String> res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.lrange(key, start, end);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -1054,13 +1012,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Long res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.sadd(key, members);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -1079,13 +1037,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Long res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.srem(key, members);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -1102,13 +1060,13 @@ public class RedisUtils {
         Jedis jedis = null;
         String res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.spop(key);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -1129,13 +1087,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Set<String> res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.sdiff(keys);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -1158,13 +1116,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Long res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.sdiffstore(dstkey, keys);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -1182,13 +1140,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Set<String> res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.sinter(keys);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -1207,13 +1165,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Long res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.sinterstore(dstkey, keys);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -1231,13 +1189,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Set<String> res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.sunion(keys);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -1256,13 +1214,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Long res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.sunionstore(dstkey, keys);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -1284,13 +1242,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Long res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.smove(srckey, dstkey, member);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -1307,13 +1265,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Long res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.scard(key);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -1331,13 +1289,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Boolean res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.sismember(key, member);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -1354,13 +1312,13 @@ public class RedisUtils {
         Jedis jedis = null;
         String res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.srandmember(key);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -1377,13 +1335,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Set<String> res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.smembers(key);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -1400,13 +1358,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Long res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.zadd(key, scoreMembers);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -1424,13 +1382,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Long res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.zadd(key, score, member);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -1447,13 +1405,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Long res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.zrem(key, members);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -1470,13 +1428,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Double res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.zincrby(key, score, member);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -1493,13 +1451,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Long res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.zrank(key, member);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -1516,13 +1474,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Long res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.zrevrank(key, member);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -1541,13 +1499,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Set<String> res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.zrevrange(key, start, end);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -1564,13 +1522,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Set<String> res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.zrevrangeByScore(key, max, min);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -1587,13 +1545,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Set<String> res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.zrevrangeByScore(key, max, min);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -1610,13 +1568,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Long res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.zcount(key, min, max);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -1631,13 +1589,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Long res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.zcard(key);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -1653,13 +1611,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Double res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.zscore(key, member);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -1676,13 +1634,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Long res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.zremrangeByRank(key, start, end);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -1699,13 +1657,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Long res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.zremrangeByScore(key, start, end);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -1722,13 +1680,13 @@ public class RedisUtils {
         Jedis jedis = null;
         Set<String> res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.keys(pattern);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -1743,13 +1701,13 @@ public class RedisUtils {
         Jedis jedis = null;
         String res = null;
         try {
-            jedis = pool.getResource();
+            jedis = jedisPool.getResource();
             res = jedis.type(key);
         } catch (Exception e) {
-            pool.returnBrokenResource(jedis);
+            jedisPool.returnBrokenResource(jedis);
             e.printStackTrace();
         } finally {
-            returnResource(pool, jedis);
+            returnResource(jedisPool, jedis);
         }
         return res;
     }
@@ -1757,12 +1715,12 @@ public class RedisUtils {
     /**
      * 返还到连接池
      *
-     * @param pool
+     * @param jedisPool
      * @param jedis
      */
-    public static void returnResource(JedisPool pool, Jedis jedis) {
+    public static void returnResource(JedisPool jedisPool, Jedis jedis) {
         if (jedis != null) {
-            pool.returnResource(jedis);
+            jedisPool.returnResource(jedis);
         }
     }
 

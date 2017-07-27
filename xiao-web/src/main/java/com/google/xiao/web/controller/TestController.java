@@ -99,4 +99,11 @@ public class TestController {
         redisTest.setValue("mytest", "1111");
         return redisTest.getValue("mytest");
     }
+
+    @RequestMapping(value = "/getRedisValue1", method = RequestMethod.GET)
+    @ResponseBody
+    public String getRedisValue1(){
+        redisTest.setValue1("mytest", "1111");
+        return redisTest.getValue1("mytest");
+    }
 }

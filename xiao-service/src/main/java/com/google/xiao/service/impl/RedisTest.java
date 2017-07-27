@@ -27,4 +27,14 @@ public class RedisTest implements IRedisTest{
          redisService.set(key,value);
     }
 
+    @Override
+    public String getValue1(String key) {
+        return redisUtil.get(key);
+    }
+
+    @Override
+    public void setValue1(String key, String value) {
+        redisUtil.set(key,value);
+    }
+
 }
