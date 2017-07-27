@@ -28,7 +28,6 @@
         <property name="testOnBorrow" value="${redis.pool.testOnBorrow}" />
         <property name="testOnReturn" value="${redis.pool.testOnReturn}" />
     </bean>
-    <!-- Redis base config -->
 
     <!-- Redis config method 1 : use spring data redis redisTemplate-->
     <bean id="jedisConnFactory"
@@ -54,18 +53,12 @@
         </property>
     </bean>
 
-    <!-- Redis config method 2 : use redis util-->
+    <!-- Redis config method 2 : use jedisPool-->
     <bean id = "jedisPool" class="redis.clients.jedis.JedisPool">
         <constructor-arg name="poolConfig" ref="poolConfig"/>
         <constructor-arg name="host" value="${redis.host}"/>
         <constructor-arg name="port" value="${redis.port}" type="int"/>
     </bean>
-
-    <!--<bean id = "redisUtils" class="com.google.xiao.service.redis.RedisUtils">-->
-        <!--<constructor-arg name="config" ref="poolConfig"/>-->
-        <!--<constructor-arg name="ip" value="${redis.host}"/>-->
-        <!--<constructor-arg name="port" value="${redis.port}"/>-->
-    <!--</bean>-->
 
 
     <!-- mongodb -->
