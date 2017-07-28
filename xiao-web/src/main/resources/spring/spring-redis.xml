@@ -17,7 +17,7 @@
 
     <context:annotation-config />
 
-    <context:property-placeholder location="classpath:redis.properties" ignore-unresolvable="true" file-encoding="utf-8" />
+    <context:property-placeholder location="classpath:environment/*/redis.properties" ignore-unresolvable="true" file-encoding="utf-8" />
 
     <!-- Redis base config -->
     <bean id="poolConfig" class="redis.clients.jedis.JedisPoolConfig">
@@ -36,17 +36,28 @@
           p:hostName="${redis.host}"
           p:port="${redis.port}"/>
 
+    <!--spring-data-redis提供了多种serializer策略
+        JdkSerializationRedisSerializer： 使用JDK的序列化手段(serializable接口，ObjectInputStrean，ObjectOutputStream)，数据以字节流存储
+        StringRedisSerializer： 字符串编码，数据以string存储
+        JacksonJsonRedisSerializer：json格式存储
+        OxmSerializer：xml格式存储
+        其中JdkSerializationRedisSerializer和StringRedisSerializer是最基础的序列化策略,
+        其中“JacksonJsonRedisSerializer”与“OxmSerializer”都是基于string存储，因此它们是较为“高级”的序列化-->
     <bean id="redisTemplate" class="org.springframework.data.redis.core.RedisTemplate"
           p:connectionFactory-ref="jedisConnFactory">
+        <!--对于普通K-V操作时，key采取的序列化策略-->
         <property name="keySerializer">
             <bean class="org.springframework.data.redis.serializer.StringRedisSerializer" />
         </property>
+        <!--value采取的序列化策略-->
         <property name="valueSerializer">
             <bean class="org.springframework.data.redis.serializer.StringRedisSerializer" />
         </property>
+        <!--在hash数据结构中，hash-key的序列化策略-->
         <property name="hashKeySerializer">
             <bean class="org.springframework.data.redis.serializer.StringRedisSerializer" />
         </property>
+        <!--hash-value的序列化策略-->
         <property name="hashValueSerializer">
             <bean class="org.springframework.data.redis.serializer.StringRedisSerializer" />
         </property>
@@ -58,7 +69,6 @@
         <constructor-arg name="host" value="${redis.host}"/>
         <constructor-arg name="port" value="${redis.port}" type="int"/>
     </bean>
-
 
     <!-- mongodb -->
     <!-- <mongo:mongo id="mongo" replica-set="${mongo.address}"></mongo:mongo>

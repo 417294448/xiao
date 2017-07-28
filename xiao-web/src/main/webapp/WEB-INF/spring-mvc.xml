@@ -14,16 +14,13 @@
 		http://www.springframework.org/schema/util
         http://www.springframework.org/schema/util/spring-util-4.0.xsd"
     default-autowire="no" default-lazy-init="true">
+    <!--相当于注册了DefaultAnnotationHandlerMapping和AnnotationMethodHandlerAdapter两个bean，配置一些messageconverter。即解决了@Controller注解的使用前提配置。-->
   	<mvc:annotation-driven />
+    <!--是对包进行扫描，实现注释驱动Bean定义，同时将bean自动注入容器中使用。即解决了@Controller标识的类的bean的注入和使用。-->
   	<context:annotation-config />
 
+    <!-- 自动扫描web包 ,将带有注解的类 纳入spring容器管理 -->
     <context:component-scan base-package="com.google.xiao" />
-
-	<!-- 配置文件 -->
-    <!--
-    <context:property-placeholder
-        location="classpath*:config.properties" ignore-unresolvable="true" file-encoding="utf-8" />
-    -->
 
 	<!-- 视图处理 -->
     <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
@@ -40,11 +37,12 @@
         <property name="maxInMemorySize" value="10"/>
     </bean>
 
+    <!--perf4j 自动注解 代码中添加 @Profiled即可-->
     <bean id="timingAspect" class="org.perf4j.slf4j.aop.TimingAspect" />
     <aop:aspectj-autoproxy>
         <aop:include name="timingAspect" />
     </aop:aspectj-autoproxy>
-
+    <!--主要是用来进行静态资源的访问。-->
     <mvc:resources location="/assets/" mapping="/assets/**" />
 
 </beans>

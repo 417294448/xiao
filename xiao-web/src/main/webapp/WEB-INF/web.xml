@@ -33,8 +33,6 @@
 		<url-pattern>/</url-pattern>
 	</servlet-mapping>
 
-
-
 	<!-- Spring 容器加载 -->
 	<listener>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
