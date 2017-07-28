@@ -6,17 +6,19 @@ package com.google.xiao.web.controller;
 
 import com.google.gson.Gson;
 import com.google.xiao.domain.TestModel;
-import com.google.xiao.service.IPerf4jService;
-import com.google.xiao.service.IRedisTest;
-import com.google.xiao.service.IRetryService;
-import com.google.xiao.service.ITestService;
+import com.google.xiao.service.*;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.ehcache.CacheManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.Cache;
+import org.springframework.cache.ehcache.EhCacheCacheManager;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.util.Collection;
 
 
 /**
@@ -41,6 +43,13 @@ public class TestController {
 
     @Autowired
     private IRedisTest redisTest;
+
+    @Autowired
+    private IEhCacheService ehCacheService;
+
+    @Autowired
+    private EhCacheCacheManager cacheManager;
+
 
     /**
      * test lombok
@@ -106,4 +115,25 @@ public class TestController {
         redisTest.setValue1("mytest", "1111");
         return redisTest.getValue1("mytest");
     }
+
+    @RequestMapping(value = "/getEhcacheValue", method = RequestMethod.GET)
+    @ResponseBody
+    public String getEhcacheValue(){
+
+        return ehCacheService.getTimestamp("1");
+    }
+
+    @RequestMapping(value = "/getTimestampNoCache", method = RequestMethod.GET)
+    @ResponseBody
+    public String getTimestampNoCache(){
+        return ehCacheService.getTimestampNoCache("1");
+    }
+
+    @RequestMapping(value = "/getEhcacheValue1", method = RequestMethod.GET)
+    @ResponseBody
+    public String getEhcacheValue1(){
+        cacheManager.getCache("myCache").put("111", "1a1a1a");
+        return cacheManager.getCache("myCache").get("111").toString();
+    }
+
 }

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="http://ehcache.org/ehcache.xsd"
+         maxBytesLocalHeap="500M">
+<!--可选策略有：LRU（最近最少使用，默认策略）、FIFO（先进先出）、LFU（最少访问次数）-->
+
+    <!-- 指定一个文件目录，当EhCache把数据写到硬盘上时，将把数据写到这个文件目录下 -->
+    <diskStore path="E:\ehCache"/>
+
+    <!--
+        参数注释
+
+        maxElementsInMemory：内存中最大缓存对象数
+        maxElementsOnDisk：硬盘中最大缓存对象数，若是0表示无穷大
+        overflowToDisk：当内存中对象数量达到maxElementsInMemory时，Ehcache将会对象写到磁盘中。
+
+        eternal：true表示对象永不过期，此时会忽略timeToIdleSeconds和timeToLiveSeconds属性，默认为false。
+        timeToIdleSeconds：设定允许对象处于空闲状态的最长时间，以秒为单位。如果该属性值为0，则表示对象可以无限 期地处于空闲状态
+        timeToLiveSeconds：设定对象允许存在于缓存中的最长时间，以秒为单位。如果该属性值为0，则表示对象可以无限期地存在于缓存中。timeToLiveSeconds必须大于timeToIdleSeconds属性，才有 意义。
+
+        maxEntriesLocalHeap：是用来限制当前缓存在堆内存上所能保存的最大元素数量的。ehcache规定如果在CacheManager上没有指定maxBytesLocalHeap时必须在各个Cache上指定maxBytesLocalHeap或者maxEntriesLocalHeap
+    -->
+
+    <!-- 设定缓存的默认数据过期策略 -->
+    <defaultCache
+            maxEntriesLocalHeap="10000"
+            eternal="false"
+            overflowToDisk="false"
+            timeToIdleSeconds="120"
+            timeToLiveSeconds="120"
+            diskSpoolBufferSizeMB="30"
+            maxEntriesLocalDisk="10000000"
+            diskExpiryThreadIntervalSeconds="120"
+            memoryStoreEvictionPolicy="LRU">
+        <persistence strategy="localTempSwap"/>
+    </defaultCache>
+
+    <cache name="myCache"
+           maxBytesLocalHeap="10000"
+           maxEntriesLocalDisk="1000"
+           eternal="false"
+           diskSpoolBufferSizeMB="30"
+           timeToIdleSeconds="300"
+           timeToLiveSeconds="600"
+           memoryStoreEvictionPolicy="LFU"
+           transactionalMode="off">
+        <persistence strategy="localTempSwap"/>
+    </cache>
+
+</ehcache>

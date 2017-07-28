@@ -15,8 +15,10 @@
         http://www.springframework.org/schema/util/spring-util-4.0.xsd"
        default-autowire="no" default-lazy-init="true">
 
+    <!-- 启用@AspectJ风格的注解 proxy-target-class="true" 是指定只能使用CGLIB代理 ,expose-proxy="true" 表示将当前代理对象暴露出去 -->
     <aop:aspectj-autoproxy expose-proxy="true"/>
-    <aop:config expose-proxy="true"/>
+
+    <!-- 启用对事务注解的支持 -->
 
     <!-- 引入redis属性配置文件 -->
     <import resource="classpath*:spring/spring-redis.xml"/>

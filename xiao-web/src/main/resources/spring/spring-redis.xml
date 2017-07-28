@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
        xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:p="http://www.springframework.org/schema/p"
        xmlns:aop="http://www.springframework.org/schema/aop" xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:cache="http://www.springframework.org/schema/cache"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
 		http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
 		http://www.springframework.org/schema/context
@@ -12,10 +14,10 @@
 		http://www.springframework.org/schema/aop
 		http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
 		http://www.springframework.org/schema/util
-        http://www.springframework.org/schema/util/spring-util-4.0.xsd"
+        http://www.springframework.org/schema/util/spring-util-4.0.xsd
+        http://www.springframework.org/schema/cache
+        http://www.springframework.org/schema/cache/spring-cache.xsd"
        default-autowire="no" default-lazy-init="true">
-
-    <context:annotation-config />
 
     <context:property-placeholder location="classpath:environment/*/redis.properties" ignore-unresolvable="true" file-encoding="utf-8" />
 
@@ -69,6 +71,13 @@
         <constructor-arg name="host" value="${redis.host}"/>
         <constructor-arg name="port" value="${redis.port}" type="int"/>
     </bean>
+
+    <!-- Cache配置 -->
+    <cache:annotation-driven cache-manager="cacheManager" />
+
+    <bean id="ehCacheManagerFactory" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean" p:configLocation="classpath:spring/ehcache-config.xml" />
+
+    <bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager" p:cacheManager-ref="ehCacheManagerFactory" />
 
     <!-- mongodb -->
     <!-- <mongo:mongo id="mongo" replica-set="${mongo.address}"></mongo:mongo>
