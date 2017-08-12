@@ -11,6 +11,8 @@
 	<!--控制台输出-->
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
 		<!-- encoder 默认配置为PatternLayoutEncoder -->
+		<!--目前PatternLayoutEncoder 是唯一有用的且默认的encoder
+		负责两件事，一是把日志信息转换成字节数组，二是把字节数组写入到输出流。-->
 		<encoder>
 			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
 		</encoder>
@@ -88,6 +90,11 @@
 	
 	<!-- 为每个包下的所有类指定，也可以指定到具体的类名称 -->
 	<logger name="com.google.xiao.service" level="${LOG_LEVEL}" additivity="false">
+		<appender-ref ref="serviceAppander" />
+	</logger>
+
+	<!--输出mybatis sql-->
+	<logger name="java.sql" level="${LOG_LEVEL}" additivity="false">
 		<appender-ref ref="serviceAppander" />
 	</logger>
 	
